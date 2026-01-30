@@ -207,7 +207,9 @@
     }
     .grid .template-btn.active{
       border-color: var(--accentBorder);
-      box-shadow: 0 0 0 2px rgba(57,160,255,.28);
+      background: var(--accent);
+      color:#f8fbff;
+      box-shadow: 0 0 0 2px rgba(57,160,255,.35), 0 12px 22px rgba(31,117,255,.25);
     }
 
     button{
@@ -284,7 +286,7 @@
       display:flex;
       gap:12px;
       flex-wrap:wrap;
-      align-items:center;
+      align-items:flex-end;
     }
     .toolbar-search{
       flex:1 1 320px;
@@ -400,19 +402,17 @@
           <input id="search" type="text" placeholder="введи слово, например: gobo">
         </div>
       </div>
-    </div>
 
-    <div class="spacer"></div>
+      <div class="toolbar-actions">
+        <button id="toggleEditorBtn" class="btn-ghost action-btn">Редактировать шаблоны</button>
 
-    <div class="toolbar-actions">
-      <button id="toggleEditorBtn" class="btn-ghost action-btn">Редактировать шаблоны</button>
-
-      <div class="switchRow action-btn" title="Добавить ваш промпт сверху, итог снизу">
-        <span class="switchLabel">Добавить в ваш промпт</span>
-        <label class="switch">
-          <input id="mergeToggle" type="checkbox">
-          <span class="slider"></span>
-        </label>
+        <div class="switchRow action-btn" title="Добавить ваш промпт сверху, итог снизу">
+          <span class="switchLabel">Добавить в ваш промпт</span>
+          <label class="switch">
+            <input id="mergeToggle" type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
       </div>
     </div>
 
