@@ -1,1 +1,903 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Prompt assistant</title>
+
+  <style>
+    /* ====== DARK (digital blue) ====== */
+    :root{
+      --bg:#06080f;
+      --card:#0c111e;
+      --card2:#0f1626;
+      --text:#e9eefb;
+      --muted:#8a94aa;
+      --border:#1c2638;
+      --shadow: 0 24px 60px rgba(2,8,18,.65);
+
+      --btn:#131c2f;
+      --btnHover:#1a2740;
+
+      --accent:#39a0ff;
+      --accentStrong:#1f75ff;
+      --accentBg: rgba(57,160,255,.16);
+      --accentBorder: rgba(57,160,255,.45);
+      --danger:#ef4444;
+      --dangerBg: rgba(239,68,68,.14);
+
+      --focus: rgba(57,160,255,.24);
+      --tg:#229ED9;
+
+      --glass: linear-gradient(135deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+    }
+
+    /* ====== LIGHT ====== */
+    body.theme-light{
+      --bg:#f2f6ff;
+      --card:#ffffff;
+      --card2:#f4f7ff;
+      --text:#0b1220;
+      --muted:#5b6472;
+      --border:#dde4f2;
+      --shadow: 0 12px 28px rgba(9,24,48,.10);
+
+      --btn:#eef3ff;
+      --btnHover:#e1e9ff;
+
+      --focus: rgba(31,117,255,.20);
+      --glass: linear-gradient(135deg, rgba(255,255,255,.7), rgba(255,255,255,.4));
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font:14px/1.45 "Inter", system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:
+        radial-gradient(900px 380px at 15% -20%, rgba(57,160,255,.18), transparent 60%),
+        radial-gradient(600px 420px at 100% 0%, rgba(31,117,255,.15), transparent 55%),
+        var(--bg);
+      background-repeat:no-repeat;
+      background-size:cover;
+      color:var(--text);
+    }
+    .wrap{max-width:1160px;margin:0 auto;padding:24px}
+
+    /* HEADER */
+    .topbar{
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:16px; margin-bottom:18px;
+    }
+    .title{font-size:22px;margin:0; letter-spacing:.4px}
+
+    .header-right{
+      display:flex; flex-direction:column; align-items:flex-end; gap:8px;
+    }
+    .header-actions{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .tg-btn{
+      width:240px;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--glass);
+      color:var(--text);
+      text-decoration:none;
+      font-size:13px;
+      transition:.15s;
+      box-shadow: var(--shadow);
+      white-space:nowrap;
+      backdrop-filter: blur(10px);
+    }
+    .tg-btn:hover{background:var(--btnHover); border-color:var(--focus)}
+    .tg-icon{width:16px;height:16px;flex:0 0 auto}
+    .credit{
+      width:240px;
+      font-size:11px;
+      color:var(--muted);
+      text-align:center;
+      line-height:1.35;
+    }
+
+    /* Theme toggle (single icon changes) */
+    .theme-toggle{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:var(--glass);
+      box-shadow: var(--shadow);
+      user-select:none;
+      backdrop-filter: blur(10px);
+    }
+    .theme-ico{
+      font-size:13px;
+      opacity:.95;
+      width:18px;
+      text-align:center;
+    }
+
+    /* Switch */
+    .switch{position:relative;display:inline-block;width:42px;height:24px}
+    .switch input{opacity:0;width:0;height:0}
+    .slider{
+      position:absolute; inset:0;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--border);
+      border-radius:999px;
+      transition:.2s;
+    }
+    body.theme-light .slider{background:#ffffff}
+    .slider:before{
+      content:"";
+      position:absolute;
+      height:18px;width:18px;
+      left:3px; top:2px;
+      background:var(--text);
+      border-radius:999px;
+      transition:.2s;
+      opacity:.9;
+    }
+    body.theme-light .slider:before{background:#0b1220}
+    .switch input:checked + .slider{background:rgba(57,160,255,.12); border-color:var(--accentBorder)}
+    .switch input:checked + .slider:before{transform:translateX(18px)}
+
+    /* CARDS */
+    .card{
+      border:1px solid var(--border);
+      background:var(--glass);
+      border-radius:22px;
+      padding:16px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+    .spacer{height:12px}
+    .row{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    }
+    .label{font-size:12px;color:var(--muted);margin:0 0 8px}
+    .pill{font-size:12px;color:var(--muted)}
+    .mono{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace
+    }
+
+    input[type="text"]{
+      width:100%;
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:var(--card2);
+      color:var(--text);
+      padding:10px 16px;
+      outline:none;
+    }
+    input[type="text"]:focus{border-color:transparent; box-shadow:0 0 0 3px var(--focus)}
+    textarea{
+      width:100%;
+      min-height:160px;
+      resize:vertical;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:var(--card2);
+      color:var(--text);
+      padding:12px;
+      outline:none;
+    }
+    textarea:focus{border-color:transparent; box-shadow:0 0 0 3px var(--focus)}
+
+    .grid{
+      display:grid;
+      gap:10px;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      margin-top:12px;
+    }
+    .grid .template-btn{
+      height:44px;
+      min-width:180px;
+      text-align:center;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .grid .template-btn.active{
+      border-color: var(--accentBorder);
+      box-shadow: 0 0 0 2px rgba(57,160,255,.28);
+    }
+
+    button{
+      cursor:pointer;
+      border:1px solid var(--border);
+      background:var(--btn);
+      color:var(--text);
+      padding:10px 16px;
+      border-radius:16px;
+      transition:.12s;
+      font-weight:600;
+    }
+    button:hover{background:var(--btnHover); border-color:var(--focus)}
+    button:active{transform:translateY(1px)}
+    .btn-ghost{background:transparent}
+
+    .btn-copy{
+      border-color: var(--accentBorder);
+      background: var(--accent);
+      color: #f8fbff;
+      font-weight:650;
+      box-shadow: 0 0 0 1px rgba(57,160,255,.12), 0 12px 26px rgba(31,117,255,.16);
+    }
+    .btn-clear{
+      border-color: rgba(239,68,68,.35);
+      background: var(--dangerBg);
+      color: var(--danger);
+      font-weight:650;
+    }
+    .btn-danger{
+      border-color: rgba(239,68,68,.35);
+      background: transparent;
+      color: var(--danger);
+    }
+
+    /* Copy row: left copy, right clear */
+    .actions{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      width:100%;
+      margin-top:10px;
+    }
+    .leftActions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .miniStatus{
+      font-size:12px;
+      color:var(--muted);
+      min-width:92px;
+    }
+    .miniStatus.ok{color:var(--accent)}
+    .miniStatus.bad{color:var(--danger)}
+
+    /* Toggle row */
+    .switchRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:8px 12px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:var(--btn);
+      min-width:220px;
+      justify-content:space-between;
+    }
+    .switchLabel{font-size:12px;color:var(--muted)}
+    .toolbar-row{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .toolbar-search{
+      flex:1 1 320px;
+      min-width:240px;
+    }
+    .search-field{
+      position:relative;
+    }
+    .search-field input{
+      padding-left:40px;
+    }
+    .search-icon{
+      position:absolute;
+      left:14px;
+      top:50%;
+      transform:translateY(-50%);
+      font-size:14px;
+      color:var(--muted);
+      pointer-events:none;
+    }
+    .toolbar-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .action-btn{
+      min-width:200px;
+      text-align:center;
+      height:44px;
+    }
+
+    /* Editor layout */
+    .editor-grid{
+      display:grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap:12px;
+    }
+    @media (max-width: 860px){ .editor-grid{grid-template-columns:1fr} }
+    .list{
+      border:1px solid var(--border);
+      border-radius:16px;
+      overflow:hidden;
+      background:var(--card2);
+      max-height:340px;
+      overflow:auto;
+    }
+    .list-item{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+      cursor:pointer;
+    }
+    .list-item:last-child{border-bottom:none}
+    .list-item:hover{background:rgba(57,160,255,.08)}
+    body.theme-light .list-item:hover{background:rgba(31,117,255,.08)}
+    .list-item.active{outline:2px solid rgba(57,160,255,.2)}
+    body.theme-light .list-item.active{outline:2px solid rgba(31,117,255,.2)}
+    .list-title{font-size:13px}
+    .list-sub{font-size:11px;color:var(--muted)}
+    .mini{font-size:11px;color:var(--muted)}
+
+    .hidden{display:none}
+  </style>
+</head>
+
+<body class="theme-dark">
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="topbar">
+    <h1 class="title">Prompt assistant</h1>
+
+    <div class="header-right">
+      <div class="header-actions">
+
+        <!-- Theme toggle: single icon changes -->
+        <div class="theme-toggle" title="Тема">
+          <span id="themeIcon" class="theme-ico">🌙</span>
+          <label class="switch">
+            <!-- checked = LIGHT -->
+            <input id="themeToggle" type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <a class="tg-btn" href="https://t.me/disignbit" target="_blank" rel="noopener">
+          <svg class="tg-icon" viewBox="0 0 240 240" aria-hidden="true">
+            <circle cx="120" cy="120" r="120" fill="#229ED9"/>
+            <path d="M54 118l132-51c6-2 11 1 9 9l-22 104c-2 7-7 9-14 6l-39-29-19 18c-2 2-4 4-8 4l3-43 78-70c3-3-1-4-5-1l-97 61-42-13c-7-2-7-7 2-10z" fill="#fff"/>
+          </svg>
+          перейти в канал автора
+        </a>
+      </div>
+
+      <div class="credit">
+        Created by the author of the telegram channel “Designbit”
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH + TEMPLATES -->
+  <div class="card">
+    <div class="toolbar-row">
+      <div class="toolbar-search">
+        <div class="pill">Поиск по кнопкам / шаблонам</div>
+        <div class="spacer"></div>
+        <div class="search-field">
+          <span class="search-icon">🔍</span>
+          <input id="search" type="text" placeholder="введи слово, например: gobo">
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="toolbar-actions">
+      <button id="toggleEditorBtn" class="btn-ghost action-btn">Редактировать шаблоны</button>
+
+      <div class="switchRow action-btn" title="Добавить ваш промпт сверху, итог снизу">
+        <span class="switchLabel">Добавить в ваш промпт</span>
+        <label class="switch">
+          <input id="mergeToggle" type="checkbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="pill">Шаблоны</div>
+    <div class="grid" id="buttons"></div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <!-- TEMPLATE EDITOR (CLOSED BY DEFAULT) -->
+  <div id="editorBlock" class="card hidden">
+    <div class="row" style="align-items:flex-start;">
+      <div>
+        <div class="pill">Редактор шаблонов (сохраняется в браузере)</div>
+        <div class="mini">Слева список, справа параметры редактирования.</div>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="newTemplateBtn">+ Новый</button>
+        <button id="exportBtn" class="btn-ghost">Экспорт JSON</button>
+        <button id="importBtn" class="btn-ghost">Импорт JSON</button>
+        <button id="resetBtn" class="btn-danger">Сбросить по умолчанию</button>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="editor-grid">
+      <div>
+        <p class="label">Список шаблонов</p>
+        <div id="templateList" class="list"></div>
+      </div>
+
+      <div>
+        <p class="label">Редактирование</p>
+
+        <div class="mini">Название (текст на кнопке):</div>
+        <div class="spacer"></div>
+        <input id="editTitle" type="text" placeholder='например: "📷 6 ракурсов"' />
+
+        <div class="spacer"></div>
+        <div class="mini">Текст шаблона:</div>
+        <div class="spacer"></div>
+        <textarea id="editText" class="mono" placeholder="текст шаблона..."></textarea>
+
+        <div class="row" style="margin-top:10px;">
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button id="saveBtn" class="btn-copy">Сохранить</button>
+            <button id="deleteBtn" class="btn-clear">Удалить шаблон</button>
+          </div>
+          <div class="mini" id="editMeta"></div>
+        </div>
+      </div>
+    </div>
+
+    <input id="importFile" type="file" accept="application/json" class="hidden" />
+  </div>
+
+  <div class="spacer"></div>
+
+  <!-- OFF MODE: ONE TEXTAREA -->
+  <div id="templateOnlyBlock" class="card">
+    <p class="label">Шаблон промпта</p>
+    <textarea id="templateOnlyText" class="mono" readonly placeholder="Нажми кнопку ниже..."></textarea>
+
+    <div class="actions">
+      <div class="leftActions">
+        <button id="copyTemplateBtn" class="btn-copy">Скопировать</button>
+        <span id="copyTemplateStatus" class="miniStatus"></span>
+      </div>
+      <button id="clearBtn" class="btn-clear">Удалить</button>
+    </div>
+  </div>
+
+  <!-- ON MODE: TWO TEXTAREAS ONLY -->
+  <div id="mergeModeBlock" class="hidden">
+    <div class="card">
+      <p class="label">Ваш промпт</p>
+      <textarea id="yourPrompt" placeholder="Вставь сюда свой промпт..."></textarea>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="card">
+      <p class="label">Итоговый промпт (копируется)</p>
+      <textarea id="finalOutput"></textarea>
+
+      <div class="actions">
+        <div class="leftActions">
+          <button id="copyFinalBtn" class="btn-copy">Скопировать</button>
+          <span id="copyFinalStatus" class="miniStatus"></span>
+        </div>
+        <button id="clearBtn2" class="btn-clear">Удалить</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+</div>
+
+<script>
+  const STORAGE_KEY = "prompt_assistant_templates_v1";
+  const THEME_KEY   = "prompt_assistant_theme_v1"; // "dark" | "light"
+
+  const defaultTemplates = [
+    {
+      id: "six_angles",
+      title: "📷 6 ракурсов",
+      text: `You are an award-winning trailer director + cinematographer + storyboard artist.
+Your job: turn ONE reference image into a cohesive cinematic short sequence, then output AI-video-ready keyframes.
+
+IMPORTANT: on output, generate EXACTLY 6 cinematic shots (6 keyframes) within a single sequence.`
+    },
+    {
+      id: "gobo",
+      title: "Gobo",
+      text: `Add cinematic gobo lighting across the subject’s face and background.
+Use organic, imperfect patterns; soft edges; realistic falloff.
+No visible light source in frame.
+Maintain the original camera angle and composition.`
+    },
+    {
+      id: "white_bg",
+      title: "Белый фон",
+      text: `Keep the person unchanged (pose, face, hair, tattoos, clothes).
+Replace the background with a clean seamless white studio backdrop.
+Preserve original lighting and skin tones; no extra props.`
+    }
+  ];
+
+  const els = {
+    // theme
+    themeToggle: document.getElementById("themeToggle"),
+    themeIcon: document.getElementById("themeIcon"),
+
+    // main
+    buttons: document.getElementById("buttons"),
+    search: document.getElementById("search"),
+    mergeToggle: document.getElementById("mergeToggle"),
+
+    templateOnlyBlock: document.getElementById("templateOnlyBlock"),
+    templateOnlyText: document.getElementById("templateOnlyText"),
+    copyTemplateBtn: document.getElementById("copyTemplateBtn"),
+    copyTemplateStatus: document.getElementById("copyTemplateStatus"),
+    clearBtn: document.getElementById("clearBtn"),
+
+    mergeModeBlock: document.getElementById("mergeModeBlock"),
+    yourPrompt: document.getElementById("yourPrompt"),
+    finalOutput: document.getElementById("finalOutput"),
+    copyFinalBtn: document.getElementById("copyFinalBtn"),
+    copyFinalStatus: document.getElementById("copyFinalStatus"),
+    clearBtn2: document.getElementById("clearBtn2"),
+
+    // editor
+    toggleEditorBtn: document.getElementById("toggleEditorBtn"),
+    editorBlock: document.getElementById("editorBlock"),
+    templateList: document.getElementById("templateList"),
+    newTemplateBtn: document.getElementById("newTemplateBtn"),
+    exportBtn: document.getElementById("exportBtn"),
+    importBtn: document.getElementById("importBtn"),
+    resetBtn: document.getElementById("resetBtn"),
+    editTitle: document.getElementById("editTitle"),
+    editText: document.getElementById("editText"),
+    saveBtn: document.getElementById("saveBtn"),
+    deleteBtn: document.getElementById("deleteBtn"),
+    editMeta: document.getElementById("editMeta"),
+    importFile: document.getElementById("importFile"),
+  };
+
+  let templates = [];
+  let selected = null;
+  let editSelectedId = null;
+
+  let templateCopyTimer = null;
+  let finalCopyTimer = null;
+
+  function setInlineStatus(where, msg, kind){
+    const el = where === "template" ? els.copyTemplateStatus : els.copyFinalStatus;
+
+    if(where === "template") clearTimeout(templateCopyTimer);
+    else clearTimeout(finalCopyTimer);
+
+    el.className = "miniStatus" + (kind ? " " + kind : "");
+    el.textContent = msg || "";
+
+    const t = setTimeout(()=>{ el.textContent=""; el.className="miniStatus"; }, 1400);
+    if(where === "template") templateCopyTimer = t;
+    else finalCopyTimer = t;
+  }
+
+  function uid(){
+    return "t_" + Math.random().toString(36).slice(2,10) + "_" + Date.now().toString(36);
+  }
+
+  function loadTemplates(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return structuredClone(defaultTemplates);
+      const parsed = JSON.parse(raw);
+      if(!Array.isArray(parsed)) throw new Error("bad format");
+      return parsed
+        .filter(x => x && typeof x.title === "string" && typeof x.text === "string")
+        .map(x => ({ id: (x.id || uid()), title: x.title, text: x.text }));
+    } catch {
+      return structuredClone(defaultTemplates);
+    }
+  }
+
+  function saveTemplates(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(templates));
+  }
+
+  function buildFinal(){
+    if(!selected) return "";
+    const base = (selected.text || "").trim();
+    const user = els.yourPrompt.value.trim();
+    return user ? `${user}\n\n${base}` : base;
+  }
+
+  function selectTemplate(t){
+    selected = t;
+    if(els.mergeToggle.checked){
+      els.finalOutput.value = buildFinal();
+    } else {
+      els.templateOnlyText.value = t.text;
+    }
+    applySearch();
+  }
+
+  function renderButtons(list){
+    els.buttons.innerHTML="";
+    list.forEach(t=>{
+      const b=document.createElement("button");
+      b.className = "template-btn" + (selected && selected.id === t.id ? " active" : "");
+      b.textContent=t.title;
+      b.onclick=()=>selectTemplate(t);
+      els.buttons.appendChild(b);
+    });
+  }
+
+  function applySearch(){
+    const q=(els.search.value||"").toLowerCase().trim();
+    if(!q) return renderButtons(templates);
+    const filtered = templates.filter(t =>
+      (t.title||"").toLowerCase().includes(q) || (t.text||"").toLowerCase().includes(q)
+    );
+    renderButtons(filtered);
+  }
+
+  async function copyText(text, el, where){
+    const value = (text || "").trim();
+    if(!value) return setInlineStatus(where, "Пусто", "bad");
+
+    try{
+      await navigator.clipboard.writeText(value);
+      setInlineStatus(where, "Скопировано ✓", "ok");
+    } catch {
+      el.focus(); el.select?.();
+      const ok=document.execCommand("copy");
+      setInlineStatus(where, ok ? "Скопировано ✓" : "Ошибка", ok ? "ok" : "bad");
+    }
+  }
+
+  function clearOutputs(){
+    selected = null;
+    els.templateOnlyText.value = "";
+    els.finalOutput.value = "";
+  }
+
+  /* ===== THEME: icon changes =====
+     toggle checked = LIGHT
+     unchecked = DARK
+  */
+  function applyTheme(theme){
+    document.body.classList.toggle("theme-light", theme === "light");
+    localStorage.setItem(THEME_KEY, theme);
+    els.themeToggle.checked = (theme === "light");
+    els.themeIcon.textContent = (theme === "light") ? "☀️" : "🌙";
+  }
+  function initTheme(){
+    const saved = localStorage.getItem(THEME_KEY) || "dark";
+    applyTheme(saved === "light" ? "light" : "dark");
+  }
+  els.themeToggle.onchange = () => applyTheme(els.themeToggle.checked ? "light" : "dark");
+
+  /* ===== MERGE TOGGLE ===== */
+  els.mergeToggle.onchange=()=>{
+    const on = els.mergeToggle.checked;
+    els.templateOnlyBlock.classList.toggle("hidden", on);
+    els.mergeModeBlock.classList.toggle("hidden", !on);
+
+    if(selected && on){
+      els.finalOutput.value = buildFinal();
+    }
+  };
+
+  els.yourPrompt.addEventListener("input", ()=>{
+    if(els.mergeToggle.checked && selected){
+      els.finalOutput.value = buildFinal();
+    }
+  });
+
+  els.copyTemplateBtn.onclick=()=>copyText(els.templateOnlyText.value, els.templateOnlyText, "template");
+  els.copyFinalBtn.onclick=()=>copyText(els.finalOutput.value, els.finalOutput, "final");
+
+  els.clearBtn.onclick=()=>{
+    clearOutputs();
+    setInlineStatus("template", "Удалено", "ok");
+  };
+  els.clearBtn2.onclick=()=>{
+    clearOutputs();
+    setInlineStatus("final", "Удалено", "ok");
+  };
+
+  els.search.oninput=applySearch;
+
+  /* ===== EDITOR ===== */
+  function escapeHtml(s){
+    return (s||"").replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  }
+
+  function renderTemplateList(){
+    els.templateList.innerHTML = "";
+    templates.forEach(t=>{
+      const item = document.createElement("div");
+      item.className = "list-item" + (t.id === editSelectedId ? " active" : "");
+      const left = document.createElement("div");
+      left.innerHTML = `<div class="list-title">${escapeHtml(t.title || "")}</div>
+                        <div class="list-sub">${escapeHtml((t.text||"").slice(0,60))}${(t.text||"").length>60?"…":""}</div>`;
+      const right = document.createElement("div");
+      right.className = "mini";
+      right.textContent = "edit";
+      item.appendChild(left);
+      item.appendChild(right);
+      item.onclick = ()=>loadIntoEditor(t.id);
+      els.templateList.appendChild(item);
+    });
+  }
+
+  function loadIntoEditor(id){
+    const t = templates.find(x=>x.id===id);
+    if(!t) return;
+    editSelectedId = id;
+    els.editTitle.value = t.title;
+    els.editText.value = t.text;
+    els.editMeta.textContent = `id: ${t.id}`;
+    renderTemplateList();
+  }
+
+  function editorNew(){
+    const t = { id: uid(), title: "Новый шаблон", text: "" };
+    templates.unshift(t);
+    saveTemplates();
+    applySearch();
+    renderTemplateList();
+    loadIntoEditor(t.id);
+  }
+
+  function editorSave(){
+    if(!editSelectedId) return;
+    const t = templates.find(x=>x.id===editSelectedId);
+    if(!t) return;
+
+    const title = els.editTitle.value.trim();
+    const text = els.editText.value;
+    if(!title) return;
+
+    t.title = title;
+    t.text = text;
+
+    saveTemplates();
+    if(selected && selected.id === t.id) selected = t;
+
+    applySearch();
+    renderTemplateList();
+  }
+
+  function editorDelete(){
+    if(!editSelectedId) return;
+    const idx = templates.findIndex(x=>x.id===editSelectedId);
+    if(idx < 0) return;
+
+    const deleted = templates[idx];
+    templates.splice(idx,1);
+    saveTemplates();
+
+    if(selected && selected.id === deleted.id){
+      clearOutputs();
+    }
+
+    editSelectedId = null;
+    els.editTitle.value = "";
+    els.editText.value = "";
+    els.editMeta.textContent = "";
+
+    applySearch();
+    renderTemplateList();
+  }
+
+  function editorExport(){
+    const blob = new Blob([JSON.stringify(templates, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "prompt-templates.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function editorImportClick(){
+    els.importFile.value = "";
+    els.importFile.click();
+  }
+
+  function editorImportFile(file){
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const parsed = JSON.parse(reader.result);
+        if(!Array.isArray(parsed)) throw new Error("not array");
+        const clean = parsed
+          .filter(x => x && typeof x.title === "string" && typeof x.text === "string")
+          .map(x => ({ id: (x.id || uid()), title: x.title, text: x.text }));
+        if(!clean.length) throw new Error("empty");
+        templates = clean;
+        saveTemplates();
+        applySearch();
+        renderTemplateList();
+        loadIntoEditor(templates[0].id);
+      } catch {}
+    };
+    reader.readAsText(file);
+  }
+
+  function editorReset(){
+    templates = structuredClone(defaultTemplates);
+    saveTemplates();
+    clearOutputs();
+
+    editSelectedId = null;
+    els.editTitle.value = "";
+    els.editText.value = "";
+    els.editMeta.textContent = "";
+
+    applySearch();
+    renderTemplateList();
+  }
+
+  els.toggleEditorBtn.onclick = () => {
+    const isOpen = !els.editorBlock.classList.contains("hidden");
+    els.editorBlock.classList.toggle("hidden", isOpen);
+    els.toggleEditorBtn.textContent = isOpen ? "Редактировать шаблоны" : "Закрыть редактор";
+    if(!isOpen){
+      renderTemplateList();
+      if(templates[0]) loadIntoEditor(templates[0].id);
+    }
+  };
+
+  els.newTemplateBtn.onclick = editorNew;
+  els.saveBtn.onclick = editorSave;
+  els.deleteBtn.onclick = editorDelete;
+  els.exportBtn.onclick = editorExport;
+  els.importBtn.onclick = editorImportClick;
+  els.resetBtn.onclick = editorReset;
+
+  els.importFile.addEventListener("change", (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(file) editorImportFile(file);
+  });
+
+  /* INIT */
+  initTheme();
+  templates = loadTemplates();
+  applySearch();
+
+  // Ensure correct initial mode: OFF = one textarea
+  els.mergeToggle.checked = false;
+  els.templateOnlyBlock.classList.remove("hidden");
+  els.mergeModeBlock.classList.add("hidden");
+</script>
+</body>
+</html>
+
 
