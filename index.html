@@ -10,13 +10,13 @@
     :root{
       --bg:#06080f;
       --card:#0c111e;
-      --card2:#0f1626;
+      --card2:#1c1e20e0;
       --text:#e9eefb;
       --muted:#8a94aa;
       --border:#1c2638;
       --shadow: 0 24px 60px rgba(2,8,18,.65);
 
-      --btn:#131c2f;
+      --btn:#222222;
       --btnHover:#1a2740;
 
       --accent:#39a0ff;
@@ -140,12 +140,12 @@
       position:absolute;
       height:18px;width:18px;
       left:3px; top:2px;
-      background:var(--text);
+      background:var(--accent);
       border-radius:999px;
       transition:.2s;
       opacity:.9;
     }
-    body.theme-light .slider:before{background:#0b1220}
+    body.theme-light .slider:before{background:var(--accent)}
     .switch input:checked + .slider{background:rgba(57,160,255,.12); border-color:var(--accentBorder)}
     .switch input:checked + .slider:before{transform:translateX(18px)}
 
@@ -153,7 +153,7 @@
     .card{
       border:1px solid var(--border);
       background:var(--glass);
-      border-radius:22px;
+      border-radius:24px;
       padding:16px;
       box-shadow: var(--shadow);
       backdrop-filter: blur(14px);
@@ -171,7 +171,7 @@
     input[type="text"]{
       width:100%;
       border:1px solid var(--border);
-      border-radius:16px;
+      border-radius:20px;
       background:var(--card2);
       color:var(--text);
       padding:10px 16px;
@@ -183,7 +183,7 @@
       min-height:160px;
       resize:vertical;
       border:1px solid var(--border);
-      border-radius:18px;
+      border-radius:22px;
       background:var(--card2);
       color:var(--text);
       padding:12px;
@@ -218,7 +218,7 @@
       background:var(--btn);
       color:var(--text);
       padding:10px 16px;
-      border-radius:16px;
+      border-radius:20px;
       transition:.15s ease;
       font-weight:600;
     }
@@ -279,7 +279,7 @@
       align-items:center;
       gap:10px;
       padding:8px 12px;
-      border-radius:16px;
+      border-radius:20px;
       border:1px solid var(--border);
       background:var(--btn);
       min-width:220px;
@@ -290,11 +290,11 @@
       display:flex;
       gap:12px;
       flex-wrap:wrap;
-      align-items:flex-end;
+      align-items:center;
     }
     .toolbar-search{
-      flex:0 0 200px;
-      min-width:200px;
+      flex:1 1 auto;
+      min-width:240px;
     }
     .search-field{
       position:relative;
@@ -335,7 +335,7 @@
       align-items:center;
       gap:10px;
       padding:6px 10px;
-      border-radius:14px;
+      border-radius:20px;
       border:1px solid var(--border);
       background:var(--btn);
     }
