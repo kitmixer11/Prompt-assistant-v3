@@ -219,11 +219,15 @@
       color:var(--text);
       padding:10px 16px;
       border-radius:16px;
-      transition:.12s;
+      transition:.15s ease;
       font-weight:600;
     }
-    button:hover{background:var(--btnHover); border-color:var(--focus)}
-    button:active{transform:translateY(1px)}
+    button:hover{
+      background:var(--btnHover);
+      border-color:var(--focus);
+      transform:translateY(-1px) scale(1.02);
+    }
+    button:active{transform:translateY(1px) scale(0.99)}
     .btn-ghost{background:transparent}
 
     .btn-copy{
@@ -289,14 +293,15 @@
       align-items:flex-end;
     }
     .toolbar-search{
-      flex:1 1 320px;
-      min-width:240px;
+      flex:0 0 200px;
+      min-width:200px;
     }
     .search-field{
       position:relative;
     }
     .search-field input{
       padding-left:40px;
+      height:44px;
     }
     .search-icon{
       position:absolute;
@@ -317,6 +322,22 @@
       min-width:200px;
       text-align:center;
       height:44px;
+    }
+    .template-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:8px;
+    }
+    .merge-toggle{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:6px 10px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:var(--btn);
     }
 
     /* Editor layout */
@@ -395,24 +416,14 @@
   <div class="card">
     <div class="toolbar-row">
       <div class="toolbar-search">
-        <div class="pill">Поиск по кнопкам / шаблонам</div>
-        <div class="spacer"></div>
         <div class="search-field">
           <span class="search-icon">🔍</span>
-          <input id="search" type="text" placeholder="введи слово, например: gobo">
+          <input id="search" type="text" placeholder="Поиск по кнопкам / шаблонам">
         </div>
       </div>
 
       <div class="toolbar-actions">
         <button id="toggleEditorBtn" class="btn-ghost action-btn">Редактировать шаблоны</button>
-
-        <div class="switchRow action-btn" title="Добавить ваш промпт сверху, итог снизу">
-          <span class="switchLabel">Добавить в ваш промпт</span>
-          <label class="switch">
-            <input id="mergeToggle" type="checkbox">
-            <span class="slider"></span>
-          </label>
-        </div>
       </div>
     </div>
 
@@ -476,7 +487,16 @@
 
   <!-- OFF MODE: ONE TEXTAREA -->
   <div id="templateOnlyBlock" class="card">
-    <p class="label">Шаблон промпта</p>
+    <div class="template-header">
+      <p class="label">Шаблон промпта</p>
+      <div class="merge-toggle" title="Добавить ваш промпт сверху, итог снизу">
+        <span class="switchLabel">Добавить в ваш промпт</span>
+        <label class="switch">
+          <input id="mergeToggle" type="checkbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
     <textarea id="templateOnlyText" class="mono" readonly placeholder="Нажми кнопку ниже..."></textarea>
 
     <div class="actions">
@@ -491,7 +511,16 @@
   <!-- ON MODE: TWO TEXTAREAS ONLY -->
   <div id="mergeModeBlock" class="hidden">
     <div class="card">
-      <p class="label">Ваш промпт</p>
+      <div class="template-header">
+        <p class="label">Ваш промпт</p>
+        <div class="merge-toggle" title="Добавить ваш промпт сверху, итог снизу">
+          <span class="switchLabel">Добавить в ваш промпт</span>
+          <label class="switch">
+            <input id="mergeToggleAlt" type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
       <textarea id="yourPrompt" placeholder="Вставь сюда свой промпт..."></textarea>
     </div>
 
@@ -542,6 +571,56 @@ Maintain the original camera angle and composition.`
       text: `Keep the person unchanged (pose, face, hair, tattoos, clothes).
 Replace the background with a clean seamless white studio backdrop.
 Preserve original lighting and skin tones; no extra props.`
+    },
+    {
+      id: "wide_16mm",
+      title: "📷 Wide 16mm",
+      text: `Use an ultra-wide 16mm lens.
+Emphasize perspective and depth; keep straight verticals.
+Maintain the original subject and composition.`
+    },
+    {
+      id: "cinema_24mm",
+      title: "📷 24mm cinematic",
+      text: `Shoot on a 24mm lens with cinematic depth.
+Keep natural distortion minimal and preserve subject scale.
+Maintain lighting and framing.`
+    },
+    {
+      id: "classic_35mm",
+      title: "📷 35mm classic",
+      text: `Capture with a 35mm lens for a balanced field of view.
+Keep the subject centered and preserve the original angle.`
+    },
+    {
+      id: "standard_50mm",
+      title: "📷 50mm standard",
+      text: `Use a 50mm lens for a natural perspective.
+Keep the subject proportions realistic and the background soft.`
+    },
+    {
+      id: "portrait_85mm",
+      title: "📷 85mm portrait",
+      text: `Use an 85mm lens for flattering compression.
+Blur the background softly; keep focus on the subject’s face.`
+    },
+    {
+      id: "tele_135mm",
+      title: "📷 135mm tele",
+      text: `Use a 135mm lens for strong compression.
+Flatten the background and isolate the subject cleanly.`
+    },
+    {
+      id: "low_angle",
+      title: "📷 Low angle",
+      text: `Capture from a low-angle camera position.
+Make the subject feel taller and more powerful while keeping framing intact.`
+    },
+    {
+      id: "top_down",
+      title: "📷 Top-down",
+      text: `Shoot a clean top-down view.
+Keep geometry straight and center the main subject in frame.`
     }
   ];
 
@@ -554,6 +633,7 @@ Preserve original lighting and skin tones; no extra props.`
     buttons: document.getElementById("buttons"),
     search: document.getElementById("search"),
     mergeToggle: document.getElementById("mergeToggle"),
+    mergeToggleAlt: document.getElementById("mergeToggleAlt"),
 
     templateOnlyBlock: document.getElementById("templateOnlyBlock"),
     templateOnlyText: document.getElementById("templateOnlyText"),
@@ -701,15 +781,20 @@ Preserve original lighting and skin tones; no extra props.`
   els.themeToggle.onchange = () => applyTheme(els.themeToggle.checked ? "light" : "dark");
 
   /* ===== MERGE TOGGLE ===== */
-  els.mergeToggle.onchange=()=>{
-    const on = els.mergeToggle.checked;
+  function setMergeMode(on){
+    els.mergeToggle.checked = on;
+    if(els.mergeToggleAlt) els.mergeToggleAlt.checked = on;
     els.templateOnlyBlock.classList.toggle("hidden", on);
     els.mergeModeBlock.classList.toggle("hidden", !on);
 
     if(selected && on){
       els.finalOutput.value = buildFinal();
     }
-  };
+  }
+
+  const handleMergeToggle = (event) => setMergeMode(event.target.checked);
+  els.mergeToggle.onchange = handleMergeToggle;
+  if(els.mergeToggleAlt) els.mergeToggleAlt.onchange = handleMergeToggle;
 
   els.yourPrompt.addEventListener("input", ()=>{
     if(els.mergeToggle.checked && selected){
@@ -893,9 +978,7 @@ Preserve original lighting and skin tones; no extra props.`
   applySearch();
 
   // Ensure correct initial mode: OFF = one textarea
-  els.mergeToggle.checked = false;
-  els.templateOnlyBlock.classList.remove("hidden");
-  els.mergeModeBlock.classList.add("hidden");
+  setMergeMode(false);
 </script>
 </body>
 </html>
