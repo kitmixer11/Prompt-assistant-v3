@@ -375,6 +375,44 @@
     .list-sub{font-size:11px;color:var(--muted)}
     .mini{font-size:11px;color:var(--muted)}
 
+    .modal{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(6,8,15,.55);
+      backdrop-filter: blur(10px);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .2s ease;
+      z-index:20;
+    }
+    .modal.is-open{
+      opacity:1;
+      pointer-events:auto;
+    }
+    .modal-card{
+      width:min(980px, 92vw);
+      max-height:86vh;
+      overflow:auto;
+      transform:translateY(12px) scale(.98);
+      transition:transform .2s ease;
+    }
+    .modal.is-open .modal-card{
+      transform:translateY(0) scale(1);
+    }
+    .modal-close{
+      width:36px;
+      height:36px;
+      border-radius:12px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      line-height:1;
+    }
+
     .hidden{display:none}
   </style>
 </head>
@@ -438,51 +476,54 @@
   <div class="spacer"></div>
 
   <!-- TEMPLATE EDITOR (CLOSED BY DEFAULT) -->
-  <div id="editorBlock" class="card hidden">
-    <div class="row" style="align-items:flex-start;">
-      <div>
-        <div class="pill">Редактор шаблонов (сохраняется в браузере)</div>
-        <div class="mini">Слева список, справа параметры редактирования.</div>
-      </div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button id="newTemplateBtn">+ Новый</button>
-        <button id="exportBtn" class="btn-ghost">Экспорт JSON</button>
-        <button id="importBtn" class="btn-ghost">Импорт JSON</button>
-        <button id="resetBtn" class="btn-danger">Сбросить по умолчанию</button>
-      </div>
-    </div>
-
-    <div class="spacer"></div>
-
-    <div class="editor-grid">
-      <div>
-        <p class="label">Список шаблонов</p>
-        <div id="templateList" class="list"></div>
-      </div>
-
-      <div>
-        <p class="label">Редактирование</p>
-
-        <div class="mini">Название (текст на кнопке):</div>
-        <div class="spacer"></div>
-        <input id="editTitle" type="text" placeholder='например: "📷 6 ракурсов"' />
-
-        <div class="spacer"></div>
-        <div class="mini">Текст шаблона:</div>
-        <div class="spacer"></div>
-        <textarea id="editText" class="mono" placeholder="текст шаблона..."></textarea>
-
-        <div class="row" style="margin-top:10px;">
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button id="saveBtn" class="btn-copy">Сохранить</button>
-            <button id="deleteBtn" class="btn-clear">Удалить шаблон</button>
-          </div>
-          <div class="mini" id="editMeta"></div>
+  <div id="editorModal" class="modal" aria-hidden="true">
+    <div class="card modal-card" role="dialog" aria-modal="true" aria-label="Редактор шаблонов">
+      <div class="row" style="align-items:flex-start;">
+        <div>
+          <div class="pill">Редактор шаблонов (сохраняется в браузере)</div>
+          <div class="mini">Слева список, справа параметры редактирования.</div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <button id="newTemplateBtn">+ Новый</button>
+          <button id="exportBtn" class="btn-ghost">Экспорт JSON</button>
+          <button id="importBtn" class="btn-ghost">Импорт JSON</button>
+          <button id="resetBtn" class="btn-danger">Сбросить по умолчанию</button>
+          <button id="closeEditorBtn" class="btn-ghost modal-close" aria-label="Закрыть">✕</button>
         </div>
       </div>
-    </div>
 
-    <input id="importFile" type="file" accept="application/json" class="hidden" />
+      <div class="spacer"></div>
+
+      <div class="editor-grid">
+        <div>
+          <p class="label">Список шаблонов</p>
+          <div id="templateList" class="list"></div>
+        </div>
+
+        <div>
+          <p class="label">Редактирование</p>
+
+          <div class="mini">Название (текст на кнопке):</div>
+          <div class="spacer"></div>
+          <input id="editTitle" type="text" placeholder='например: "📷 6 ракурсов"' />
+
+          <div class="spacer"></div>
+          <div class="mini">Текст шаблона:</div>
+          <div class="spacer"></div>
+          <textarea id="editText" class="mono" placeholder="текст шаблона..."></textarea>
+
+          <div class="row" style="margin-top:10px;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button id="saveBtn" class="btn-copy">Сохранить</button>
+              <button id="deleteBtn" class="btn-clear">Удалить шаблон</button>
+            </div>
+            <div class="mini" id="editMeta"></div>
+          </div>
+        </div>
+      </div>
+
+      <input id="importFile" type="file" accept="application/json" class="hidden" />
+    </div>
   </div>
 
   <div class="spacer"></div>
@@ -652,7 +693,7 @@ Keep geometry straight and center the main subject in frame.`
 
     // editor
     toggleEditorBtn: document.getElementById("toggleEditorBtn"),
-    editorBlock: document.getElementById("editorBlock"),
+    editorModal: document.getElementById("editorModal"),
     templateList: document.getElementById("templateList"),
     newTemplateBtn: document.getElementById("newTemplateBtn"),
     exportBtn: document.getElementById("exportBtn"),
@@ -662,6 +703,7 @@ Keep geometry straight and center the main subject in frame.`
     editText: document.getElementById("editText"),
     saveBtn: document.getElementById("saveBtn"),
     deleteBtn: document.getElementById("deleteBtn"),
+    closeEditorBtn: document.getElementById("closeEditorBtn"),
     editMeta: document.getElementById("editMeta"),
     importFile: document.getElementById("importFile"),
   };
@@ -967,15 +1009,23 @@ Keep geometry straight and center the main subject in frame.`
     renderTemplateList();
   }
 
-  els.toggleEditorBtn.onclick = () => {
-    const isOpen = !els.editorBlock.classList.contains("hidden");
-    els.editorBlock.classList.toggle("hidden", isOpen);
-    els.toggleEditorBtn.textContent = isOpen ? "Редактировать шаблоны" : "Закрыть редактор";
-    if(!isOpen){
-      renderTemplateList();
-      if(templates[0]) loadIntoEditor(templates[0].id);
-    }
-  };
+  function openEditor(){
+    els.editorModal.classList.add("is-open");
+    els.editorModal.setAttribute("aria-hidden", "false");
+    renderTemplateList();
+    if(templates[0]) loadIntoEditor(templates[0].id);
+  }
+
+  function closeEditor(){
+    els.editorModal.classList.remove("is-open");
+    els.editorModal.setAttribute("aria-hidden", "true");
+  }
+
+  els.toggleEditorBtn.onclick = openEditor;
+  els.closeEditorBtn.onclick = closeEditor;
+  els.editorModal.addEventListener("click", (event)=>{
+    if(event.target === els.editorModal) closeEditor();
+  });
 
   els.newTemplateBtn.onclick = editorNew;
   els.saveBtn.onclick = editorSave;
