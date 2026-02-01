@@ -188,10 +188,15 @@
       color:var(--text);
       padding:12px;
       outline:none;
-      transition:opacity .18s ease;
     }
     textarea:focus{border-color:transparent; box-shadow:0 0 0 3px var(--focus)}
-    textarea.is-fading{opacity:.15}
+    textarea.fade-in{
+      animation: fadeInText .28s ease-out;
+    }
+    @keyframes fadeInText{
+      from{opacity:0}
+      to{opacity:1}
+    }
 
     .grid{
       display:grid;
@@ -675,12 +680,9 @@ Keep geometry straight and center the main subject in frame.`
 
   function fadeTextarea(el){
     if(!el) return;
-    el.classList.add("is-fading");
-    requestAnimationFrame(()=>{
-      requestAnimationFrame(()=>{
-        el.classList.remove("is-fading");
-      });
-    });
+    el.classList.remove("fade-in");
+    void el.offsetHeight;
+    el.classList.add("fade-in");
   }
 
   function setInlineStatus(where, msg, kind){
