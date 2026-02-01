@@ -188,8 +188,10 @@
       color:var(--text);
       padding:12px;
       outline:none;
+      transition:opacity .18s ease;
     }
     textarea:focus{border-color:transparent; box-shadow:0 0 0 3px var(--focus)}
+    textarea.is-fading{opacity:.15}
 
     .grid{
       display:grid;
@@ -671,6 +673,16 @@ Keep geometry straight and center the main subject in frame.`
   let templateCopyTimer = null;
   let finalCopyTimer = null;
 
+  function fadeTextarea(el){
+    if(!el) return;
+    el.classList.add("is-fading");
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        el.classList.remove("is-fading");
+      });
+    });
+  }
+
   function setInlineStatus(where, msg, kind){
     const el = where === "template" ? els.copyTemplateStatus : els.copyFinalStatus;
 
@@ -718,8 +730,10 @@ Keep geometry straight and center the main subject in frame.`
     selected = t;
     if(els.mergeToggle.checked){
       els.finalOutput.value = buildFinal();
+      fadeTextarea(els.finalOutput);
     } else {
       els.templateOnlyText.value = t.text;
+      fadeTextarea(els.templateOnlyText);
     }
     applySearch();
   }
