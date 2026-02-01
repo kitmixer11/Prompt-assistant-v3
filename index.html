@@ -188,15 +188,10 @@
       color:var(--text);
       padding:12px;
       outline:none;
+      transition:opacity .22s ease;
     }
     textarea:focus{border-color:transparent; box-shadow:0 0 0 3px var(--focus)}
-    textarea.fade-in{
-      animation: fadeInText .28s ease-out;
-    }
-    @keyframes fadeInText{
-      from{opacity:0}
-      to{opacity:1}
-    }
+    textarea.fade-out{opacity:0}
 
     .grid{
       display:grid;
@@ -678,11 +673,15 @@ Keep geometry straight and center the main subject in frame.`
   let templateCopyTimer = null;
   let finalCopyTimer = null;
 
-  function fadeTextarea(el){
+  function fadeTextarea(el, updateValue){
     if(!el) return;
-    el.classList.remove("fade-in");
-    void el.offsetHeight;
-    el.classList.add("fade-in");
+    el.classList.add("fade-out");
+    requestAnimationFrame(()=>{
+      if(updateValue) updateValue();
+      requestAnimationFrame(()=>{
+        el.classList.remove("fade-out");
+      });
+    });
   }
 
   function setInlineStatus(where, msg, kind){
@@ -731,11 +730,13 @@ Keep geometry straight and center the main subject in frame.`
   function selectTemplate(t){
     selected = t;
     if(els.mergeToggle.checked){
-      els.finalOutput.value = buildFinal();
-      fadeTextarea(els.finalOutput);
+      fadeTextarea(els.finalOutput, () => {
+        els.finalOutput.value = buildFinal();
+      });
     } else {
-      els.templateOnlyText.value = t.text;
-      fadeTextarea(els.templateOnlyText);
+      fadeTextarea(els.templateOnlyText, () => {
+        els.templateOnlyText.value = t.text;
+      });
     }
     applySearch();
   }
